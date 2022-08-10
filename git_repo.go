@@ -26,12 +26,11 @@ type GitRepo struct {
 	Path       string
 	BranchName string
 	Repo       *git.Repository
-	privateKey []byte
 	PublicKeys *gitssh.PublicKeys
 }
 
-func (gr *GitRepo) SetKeys() error {
-	key, err := ssh.ParseRawPrivateKey(gr.privateKey)
+func (gr *GitRepo) SetKeys(privateKey []byte) error {
+	key, err := ssh.ParseRawPrivateKey(privateKey)
 
 	if err != nil {
 		return fmt.Errorf("ParseRawPrivateKey Error: %v", err)
@@ -51,17 +50,11 @@ func (gr *GitRepo) SetKeys() error {
 	return nil
 }
 
-func New(repoURL, branchName, repoPath string, privateKey []byte) (*GitRepo, error) {
+func New(repoURL, branchName, repoPath string) (*GitRepo, error) {
 	gitRepo := &GitRepo{
 		URL:        repoURL,
 		Path:       repoPath,
 		BranchName: branchName,
-		privateKey: privateKey,
-	}
-
-	err := gitRepo.SetKeys()
-	if err != nil {
-		return nil, err
 	}
 
 	return gitRepo, nil
@@ -144,7 +137,7 @@ func (gr *GitRepo) EnsurePath() error {
 	if os.IsNotExist(err) {
 		err = os.Mkdir(gr.Path, 0755)
 		if err != nil {
-			cee.Logger.Info().
+			Logger.Info().
 				Err(err).
 				Str("repo_path", gr.Path).
 				Msg("Mkdir Error on repository dir path")

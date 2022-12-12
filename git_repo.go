@@ -2,6 +2,7 @@ package gt
 
 import (
 	"fmt"
+
 	"os"
 	"sync"
 
@@ -64,6 +65,12 @@ func (gr *GitRepo) Open() {
 	repository, err := git.PlainOpen(gr.Path)
 	if err != nil {
 		Logger.Info().Err(err).Msg("Repo Open Error")
+		return
+	}
+	rems, err := repository.Remotes()
+	if err == nil && len(rems) > 0 {
+		rem := rems[0]
+		Logger.Info().Strs("URLs", rem.Config().URLs).Msgf("Local Remote URLs Format")
 	}
 	gr.Repo = repository
 }

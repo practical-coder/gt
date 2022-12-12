@@ -68,6 +68,14 @@ func (gr *GitRepo) Open() {
 	gr.Repo = repository
 }
 
+func (gr *GitRepo) RevisionExists(revName string) bool {
+	_, err := gr.Repo.ResolveRevision(plumbing.Revision(revName))
+	if err == nil {
+		return true
+	}
+	return false
+}
+
 func (gr *GitRepo) LatestSHA(length int) string {
 	h, err := gr.Repo.ResolveRevision(plumbing.Revision(gr.BranchName))
 	if err != nil {

@@ -183,13 +183,19 @@ func (gr *GitRepo) Clone() error {
 
 func (gr *GitRepo) CloneOrPull() error {
 	err := gr.Clone()
-
+	Logger.Info().Err(err).Msg("Clone result")
 	switch err {
 	case nil:
 		return nil
 	case git.ErrRepositoryAlreadyExists:
+		Logger.Info().Msg("Recognized as git.ErrRepositoryAlreadyExists")
 		pullErr := gr.Pull()
 		if pullErr != nil {
+			Logger.Info().Err(pullErr).Msg("Pull Error")
+			if pullErr == git.NoErrAlreadyUpToDate {
+				// Already Up To Date does not count as Error
+				return nil
+			}
 			return pullErr
 		}
 	default:

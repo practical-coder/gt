@@ -77,16 +77,18 @@ func (gr *GitRepo) Open() {
 
 func (gr *GitRepo) RevisionExists(revName string) bool {
 	_, err := gr.Repo.ResolveRevision(plumbing.Revision(revName))
-	if err == nil {
-		return true
-	}
-	return false
+	return err == nil
 }
 
 func (gr *GitRepo) LatestSHA(length int) string {
-	h, err := gr.Repo.ResolveRevision(plumbing.Revision(gr.BranchName))
+	plumbing_rev := plumbing.Revision(gr.BranchName)
+	h, err := gr.Repo.ResolveRevision(plumbing_rev)
 	if err != nil {
-		Logger.Info().Err(err).Msg("LatestSHA Error")
+		Logger.Info().
+			Err(err).
+			Str("branch_name", gr.BranchName).
+			Str("plumbing_revision", plumbing_rev.String()).
+			Msg("LatestSHA Error")
 	}
 	return h.String()[:length]
 }
